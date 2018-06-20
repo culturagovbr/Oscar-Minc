@@ -8,12 +8,14 @@ class Oscar_Minc_Shortcodes
 {
     public function __construct()
     {
-        add_shortcode('oscar-minc', array($this, 'oscar_minc_subscription_form_shortcode'));
-        add_shortcode('oscar-register', array($this, 'oscar_minc_auth_form'));
-        add_shortcode('oscar-login', array($this, 'oscar_minc_login_form'));
-        add_shortcode('oscar-subscriptions', array($this, 'oscar_minc_user_subscriptions'));
-        add_shortcode('oscar-upload-video', array($this, 'oscar_minc_video_upload_form'));
-        add_shortcode('oscar-password-lost-form', array($this, 'render_password_lost_form'));
+        if( !is_admin() ){
+			add_shortcode('oscar-minc', array($this, 'oscar_minc_subscription_form_shortcode'));
+			add_shortcode('oscar-register', array($this, 'oscar_minc_auth_form'));
+			add_shortcode('oscar-login', array($this, 'oscar_minc_login_form'));
+			add_shortcode('oscar-subscriptions', array($this, 'oscar_minc_user_subscriptions'));
+			add_shortcode('oscar-upload-video', array($this, 'oscar_minc_video_upload_form'));
+			add_shortcode('oscar-password-lost-form', array($this, 'render_password_lost_form'));
+        }
     }
 
     /**

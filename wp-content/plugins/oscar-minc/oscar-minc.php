@@ -236,7 +236,7 @@ if (!class_exists('OscarMinC')) :
                         <div class="oscar-thickbox-modal-body">
                             <?php echo do_shortcode('[video src="'. wp_get_attachment_url( $oscar_movie_id ) .'"]'); ?>
                             <p>Proponente: <b><?php echo $post_author->display_name; ?></b></p>
-                            <p>Filme: <b><?php echo get_field('titulo_do_filme', $post_id); ?></b> <a href="#"><small>(baixar filme)</small></a></p>
+                            <p>Filme: <b><?php echo get_field('titulo_do_filme', $post_id); ?></b> <a href="<?php echo wp_get_attachment_url( $oscar_movie_id ); ?>" target="_blank"><small>(baixar filme)</small></a></p>
                             <p>Sinopse:<br>
                             <?php echo get_field('breve_sinopse_em_portugues', $post_id); ?></p>
                         </div>
@@ -246,28 +246,6 @@ if (!class_exists('OscarMinC')) :
                     echo $oscar_movie_id ? '<a href="#TB_inline?width=600&height=400&inlineId=oscar-movie-id-'. $post_id .'" class="thickbox oscar-thickbox-link">' . get_field('titulo_do_filme', $post_id) . '<br><small style="color: green;">Filme enviado</small></a>' : get_field('titulo_do_filme', $post_id) . '<br><small style="color: red;">Filme não enviado</small>';
                     break;
             }
-
-			if(isset($_REQUEST["file"])){
-                var_dump($_REQUEST);
-                die;
-				// Get parameters
-				$file = urldecode($_REQUEST["file"]); // Decode URL-encoded string
-				$filepath = "images/" . $file;
-
-				// Process download
-				if(file_exists($filepath)) {
-					header('Content-Description: File Transfer');
-					header('Content-Type: application/octet-stream');
-					header('Content-Disposition: attachment; filename="'.basename($filepath).'"');
-					header('Expires: 0');
-					header('Cache-Control: must-revalidate');
-					header('Pragma: public');
-					header('Content-Length: ' . filesize($filepath));
-					flush(); // Flush system output buffer
-					readfile($filepath);
-					exit;
-				}
-			}
         }
 
         /**
