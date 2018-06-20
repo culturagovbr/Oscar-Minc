@@ -13,6 +13,7 @@ class Oscar_Minc_Shortcodes
         add_shortcode('oscar-login', array($this, 'oscar_minc_login_form'));
         add_shortcode('oscar-subscriptions', array($this, 'oscar_minc_user_subscriptions'));
         add_shortcode('oscar-upload-video', array($this, 'oscar_minc_video_upload_form'));
+        add_shortcode('oscar-password-lost-form', array($this, 'render_password_lost_form'));
     }
 
     /**
@@ -64,66 +65,77 @@ class Oscar_Minc_Shortcodes
      */
     public function oscar_minc_auth_form($atts)
     {
+		if ($_POST['reg_submit']) {
+			$this->validation();
+			$this->registration();
+		}
 
-        if (is_user_logged_in()):
-            echo 'Você está logado neste momento, para efetuar um novo registro será preciso fazer <b><a href="' . wp_logout_url() . '">logout</a></b>.';
-        else:
+		$name = null;
+		$email = null;
+		$cnpj = null;
+		$password = null;
 
-            if ($_POST['reg_submit']) {
-                $this->validation();
-                $this->registration();
-            }
+		if ( is_user_logged_in() ) {
+			$current_user = wp_get_current_user();
+			$name = $current_user->display_name;
+			$email = $current_user->user_email;
+			$cnpj = OscarMinC::mask(get_user_meta( $current_user->ID, '_user_cnpj', true ), '##.###.###/####-##'); ;
+        }
 
-            ob_start(); ?>
-            <div class="text-right">
-                <p>Já possui cadastro? Faça login <b><a href="<?php echo home_url('/login'); ?>">aqui</a>.</b></p>
-            </div>
-            <form id="oscar-register-form" method="post" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
-                <div class="login-form row">
-                    <div class="form-group col-md-6">
-                        <label class="login-field-icon fui-user" for="reg-name">Nome completo</label>
-                        <input name="reg_name" type="text" class="form-control login-field"
-                               value="<?php echo(isset($_POST['reg_name']) ? $_POST['reg_name'] : null); ?>"
-                               placeholder="" id="reg-name" required/>
-                    </div>
-
-                    <div class="form-group col-md-6">
-                        <label class="login-field-icon fui-mail" for="reg-email">Email</label>
-                        <input name="reg_email" type="email" class="form-control login-field"
-                               value="<?php echo(isset($_POST['reg_email']) ? $_POST['reg_email'] : null); ?>"
-                               placeholder="" id="reg-email" required/>
-                    </div>
-
-                    <div class="form-group col-md-4">
-                        <label class="login-field-icon fui-lock" for="reg-cnpj">CNPJ</label>
-                        <input name="cnpj" type="text" class="form-control login-field"
-                               value="<?php echo(isset($_POST['cnpj']) ? $_POST['cnpj'] : null); ?>"
-                               placeholder="00.000.000/0000-00" id="reg-cnpj" required/>
-                    </div>
-
-                    <div class="form-group col-md-4">
-                        <label class="login-field-icon fui-lock" for="reg-pass">Senha</label>
-                        <input name="reg_password" type="password" class="form-control login-field"
-                               value="<?php echo(isset($_POST['reg_password']) ? $_POST['reg_password'] : null); ?>"
-                               placeholder="" id="reg-pass" required/>
-                    </div>
-
-                    <div class="form-group col-md-4">
-                        <label class="login-field-icon fui-lock" for="reg-pass-repeat">Repita a senha</label>
-                        <input name="reg_password_repeat" type="password" class="form-control login-field"
-                               value="<?php echo(isset($_POST['reg_password_repeat']) ? $_POST['reg_password_repeat'] : null); ?>"
-                               placeholder="" id="reg-pass-repeat" required/>
-                    </div>
-
-                    <div class="form-group col-md-12 text-right">
-                        <input class="btn btn-default" type="submit" name="reg_submit" value="Cadastrar"/>
-                    </div>
+		ob_start();
+        if ( !is_user_logged_in() ) : ?>
+        <div class="text-right">
+            <p>Já possui cadastro? Faça login <b><a href="<?php echo home_url('/login'); ?>">aqui</a>.</b></p>
+        </div>
+        <?php endif; ?>
+        <form id="oscar-register-form" method="post" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
+            <div class="login-form row">
+                <div class="form-group col-md-6">
+                    <label class="login-field-icon fui-user" for="reg-name">Nome completo</label>
+                    <input name="reg_name" type="text" class="form-control login-field"
+                           value="<?php echo(isset($_POST['reg_name']) ? $_POST['reg_name'] : $name); ?>"
+                           placeholder="" id="reg-name" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
                 </div>
-            </form>
 
-            <?php return ob_get_clean();
+                <div class="form-group col-md-6">
+                    <label class="login-field-icon fui-mail" for="reg-email">Email</label>
+                    <input name="reg_email" type="email" class="form-control login-field"
+                           value="<?php echo(isset($_POST['reg_email']) ? $_POST['reg_email'] : $email); ?>"
+                           placeholder="" id="reg-email" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
+                </div>
 
-        endif;
+                <div class="form-group col-md-4">
+                    <label class="login-field-icon fui-lock" for="reg-cnpj">CNPJ</label>
+                    <input name="cnpj" type="text" class="form-control login-field"
+                           value="<?php echo(isset($_POST['cnpj']) ? $_POST['cnpj'] : $cnpj); ?>"
+                           placeholder="00.000.000/0000-00" id="reg-cnpj" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label class="login-field-icon fui-lock" for="reg-pass">Senha</label>
+                    <input name="reg_password" type="password" class="form-control login-field"
+                           value="<?php echo(isset($_POST['reg_password']) ? $_POST['reg_password'] : null); ?>"
+                           placeholder="" id="reg-pass" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label class="login-field-icon fui-lock" for="reg-pass-repeat">Repita a senha</label>
+                    <input name="reg_password_repeat" type="password" class="form-control login-field"
+                           value="<?php echo(isset($_POST['reg_password_repeat']) ? $_POST['reg_password_repeat'] : null); ?>"
+                           placeholder="" id="reg-pass-repeat" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
+                </div>
+
+                <div class="form-group col-md-12 text-right">
+                    <input class="btn btn-default" type="submit" name="reg_submit" value="<?php echo is_user_logged_in() ? 'Atualizar' : 'Cadastrar'; ?>"/>
+                </div>
+            </div>
+        <?php if( is_user_logged_in() ): ?>
+            <input type="hidden" name="is-updating" value="1">
+            <input type="hidden" name="user-id" value="<?php echo $current_user->ID; ?>">
+        <?php endif; ?>
+        </form>
+
+		<?php return ob_get_clean();
     }
 
     /**
@@ -138,20 +150,33 @@ class Oscar_Minc_Shortcodes
         $cnpj = $_POST['cnpj'];
         $password = $_POST['reg_password'];
         $reg_password_repeat = $_POST['reg_password_repeat'];
+		$is_updating = isset( $_POST['is-updating'] ) ? true : false;
 
-        if (empty($username) || empty($password) || empty($email) || empty($cnpj)) {
-            return new WP_Error('field', 'Todos os campos são de preenchimento obrigatório.');
+		if( !$is_updating ){
+			if (empty($username) || empty($password) || empty($email) || empty($cnpj)) {
+				return new WP_Error('field', 'Todos os campos são de preenchimento obrigatório.');
+			}
+        } else {
+			if (empty($username) || empty($email) || empty($cnpj)) {
+				return new WP_Error('field', 'Todos os campos são de preenchimento obrigatório.');
+			}
         }
 
-        if (strlen($password) < 5) {
-            return new WP_Error('password', 'A senha está muito curta.');
+		if( !$is_updating ){
+            if (strlen($password) < 5) {
+                return new WP_Error('password', 'A senha está muito curta.');
+            }
+        } else {
+            if ( !empty($password) && strlen($password) < 5) {
+                return new WP_Error('password', 'A senha está muito curta.');
+            }
         }
 
         if (!is_email($email)) {
             return new WP_Error('email_invalid', 'O email parece ser inválido');
         }
 
-        if (email_exists($email)) {
+        if (email_exists($email) && !$is_updating) {
             return new WP_Error('email', 'Este email já sendo utilizado, para cadastrar um novo filme, por favor utilize outro email.');
         }
 
@@ -174,6 +199,8 @@ class Oscar_Minc_Shortcodes
         $email = $_POST['reg_email'];
         $cnpj = str_replace('.', '', str_replace('-', '', str_replace('/', '', $_POST['cnpj'])));
         $password = $_POST['reg_password'];
+        $user_id = $_POST['user-id'];
+        $is_updating = isset( $_POST['is-updating'] ) ? true : false;
 
         $userdata = array(
             'first_name' => esc_attr($username),
@@ -185,35 +212,58 @@ class Oscar_Minc_Shortcodes
 
         $errors = $this->validation();
 
-        if (is_wp_error($errors)) {
+        if (is_wp_error($errors)) :
             echo '<div class="alert alert-danger">';
             echo '<strong>' . $errors->get_error_message() . '</strong>';
             echo '</div>';
-        } else {
-            $register_user = wp_insert_user($userdata);
-            if (!is_wp_error($register_user)) {
-                add_user_meta($register_user, '_user_cnpj', esc_attr($cnpj), true);
-                echo '<div class="alert alert-success">';
-                echo 'Cadastro realizado com sucesso. Você será redirionado para a tela de login em <b class="time-before-redirect">5</b> segundos, caso isso não ocorra automaticamente, clique <strong><a href="' . home_url('/login') . '">aqui</a></strong>!';
-                echo '</div>';
-                $_POST = array(); ?>
-                <script type="text/javascript">
-                    var counter = 5;
-                    var interval = setInterval(function() {
-                        counter--;
-                        $('.time-before-redirect').text(counter);
-                        if (counter === 0) {
-                            clearInterval(interval);
-                            window.location = '<?php echo home_url("/login"); ?>';
-                        }
-                    }, 1000);
-                </script>
-            <?php } else {
-                echo '<div class="alert alert-danger">';
-                echo '<strong>' . $register_user->get_error_message() . '</strong>';
-                echo '</div>';
+        else :
+            if ( $is_updating ) {
+				$userdata = array(
+					'ID' => $user_id,
+					'first_name' => esc_attr($username),
+					'display_name' => esc_attr($username),
+					'user_login' => esc_attr($email),
+					'user_email' => esc_attr($email),
+					'user_pass' => esc_attr($password)
+				);
+
+				$user_id = wp_update_user($userdata);
+
+				if ( is_wp_error( $user_id ) ) {
+					echo '<div class="alert alert-danger">';
+					echo '<strong>' . $user_id->get_error_message() . '</strong>';
+					echo '</div>';
+				} else {
+					echo '<div class="alert alert-success">';
+					echo 'Cadastro atualizado com sucesso.';
+					echo '</div>';
+				}
+            } else {
+				$register_user = wp_insert_user($userdata);
+				if (!is_wp_error($register_user)) {
+					add_user_meta($register_user, '_user_cnpj', esc_attr($cnpj), true);
+					echo '<div class="alert alert-success">';
+					echo 'Cadastro realizado com sucesso. Você será redirionado para a tela de login em <b class="time-before-redirect">5</b> segundos, caso isso não ocorra automaticamente, clique <strong><a href="' . home_url('/login') . '">aqui</a></strong>!';
+					echo '</div>';
+					$_POST = array(); ?>
+                    <script type="text/javascript">
+                        var counter = 5;
+                        var interval = setInterval(function() {
+                            counter--;
+                            $('.time-before-redirect').text(counter);
+                            if (counter === 0) {
+                                clearInterval(interval);
+                                window.location = '<?php echo home_url("/login"); ?>';
+                            }
+                        }, 1000);
+                    </script>
+				<?php } else {
+					echo '<div class="alert alert-danger">';
+					echo '<strong>' . $register_user->get_error_message() . '</strong>';
+					echo '</div>';
+				}
             }
-        }
+        endif;
 
     }
 
@@ -222,18 +272,36 @@ class Oscar_Minc_Shortcodes
      *
      */
     public function oscar_minc_login_form()
-    {
-        echo '<div class="text-right">
-            <p>Ainda não possui cadastro? Faça o seu <b><a href="' . home_url('/cadastro') . '">aqui</a>.</b></p>
-        </div>';
+    { ?>
+
+        <div class="text-right">
+            <p>Ainda não possui cadastro? Faça o seu <b><a href="<?php echo home_url('/cadastro'); ?>">aqui</a>.</b></p>
+        </div>
+
+        <?php if ( isset( $_GET['login'] ) && $_GET['login'] === 'failed' ) : ?>
+        <div class="alert alert-danger" role="alert">
+            Erro ao realizar o login. Por favor, verifique as informações e tente novamente
+        </div>
+        <?php endif;
+
+		if ( isset( $_GET['checkemail'] ) && $_GET['checkemail'] === 'confirm' ) : ?>
+            <div class="alert alert-success" role="alert">
+                Cheque seu email para recuperar sua senha.
+            </div>
+		<?php endif;
 
         wp_login_form(
             array(
                 'redirect' => home_url(),
                 'form_id' => 'oscar-login-form',
-                'label_username' => __('Endereço de e-mail')
+                'label_username' => __('Endereço de e-mail'),
+                'value_username' => isset( $_COOKIE['log'] ) ? $_COOKIE['log'] : null
             )
-        );
+        ); ?>
+
+        <!--<p><a href="<?php /*echo wp_lostpassword_url( home_url() ); */?>" class="forget-password-link" title="Esqueceu a senha?">Esqueceu a senha?</a></p>-->
+
+        <?php
     }
 
     /**
@@ -403,5 +471,34 @@ class Oscar_Minc_Shortcodes
 
         return ob_get_clean();
     }
+
+	/**
+	 * A shortcode for rendering the form used to initiate the password reset.
+	 *
+	 * @param  array   $attributes  Shortcode attributes.
+	 * @param  string  $content     The text content for shortcode. Not used.
+	 *
+	 * @return string  The shortcode output
+     *
+	 */
+	public function render_password_lost_form( $attributes, $content = null )
+    { ?>
+
+        <div id="password-lost-form" class="widecolumn">
+            <p>Digite seu nome de usuário ou endereço de e-mail. Você receberá um link para criar uma nova senha via e-mail.</p>
+
+            <form id="lostpasswordform" action="<?php echo wp_lostpassword_url(); ?>" method="post">
+                <div class="row">
+                    <div class="form-group col-md-12">
+                        <label for="user_login">Email</label>
+                        <input type="text" name="user_login" id="user_login" class="form-control login-field">
+                    </div>
+                    <div class="form-group col-md-12 text-right">
+                        <input type="submit" name="submit" class="lostpassword-button btn btn-default" value="Recuperar senha"/>
+                    </div>
+                </div>
+            </form>
+        </div>
+	<?php }
 
 }

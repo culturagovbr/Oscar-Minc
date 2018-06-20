@@ -54,6 +54,11 @@ if (!class_exists('OscarMinC')) :
             add_action('wp_ajax_nopriv_error_on_upload_oscar_video', array($this, 'error_on_upload_oscar_video'));
             add_action('wp_ajax_support_message', array($this, 'support_message'));
             add_action('wp_ajax_nopriv_support_message', array($this, 'support_message'));
+            add_action('wp_login_failed', array($this, 'front_end_login_fail'), 10, 2);
+            add_action('login_form_middle', array($this, 'add_lost_password_link'));
+			add_action('login_form_lostpassword', array( $this, 'redirect_to_custom_lostpassword' ));
+			add_action('login_form_lostpassword', array( $this, 'do_password_lost' ) );
+			add_filter('retrieve_password_message', array( $this, 'replace_retrieve_password_message' ), 10, 4);
         }
 
         /**
@@ -633,6 +638,7 @@ if (!class_exists('OscarMinC')) :
 			if (
 				!is_user_logged_in() && is_page('minhas-inscricoes') ||
 				!is_user_logged_in() && is_page('enviar-video') ||
+				!is_user_logged_in() && is_page('perfil') ||
 				!is_user_logged_in() && is_page('inscricao')
 			) {
 				wp_redirect( home_url('/login') );
@@ -641,6 +647,11 @@ if (!class_exists('OscarMinC')) :
 
 			if (is_user_logged_in() && is_page('login')  ) {
 				wp_redirect( home_url('/cadastro') );
+				exit;
+			}
+
+			if (is_user_logged_in() && is_page('cadastro')  ) {
+				wp_redirect( home_url('/perfil') );
 				exit;
 			}
         }
@@ -800,6 +811,98 @@ if (!class_exists('OscarMinC')) :
 				wp_send_json_success('Sua mensagem foi enviada com sucesso e será analisada por nossa equipe.');
 				exit;
 			}
+		}
+
+		/**
+         * This redirects the failed login to the custom login page instead of default login page with a modified url
+         *
+		 * @param $username
+		 */
+		public function front_end_login_fail( $username ) {
+		    setcookie('log', $username);
+			$page_login = get_page_by_title( 'login' );
+
+			// Getting URL of the login page
+			$referrer = $_SERVER['HTTP_REFERER'];
+			// if there's a valid referrer, and it's not the default log-in screen
+			if( !empty( $referrer ) && !strstr( $referrer,'wp-login' ) && !strstr( $referrer,'wp-admin' ) ) {
+				// wp_redirect( get_permalink( $page_login->ID ) . "?login=failed" );
+				wp_redirect( add_query_arg('login', 'failed', get_permalink( $page_login->ID )) );
+				exit;
+			}
+
+		}
+
+		/**
+         * Add the 'Lost Password?' link to wp_login_form() output
+         *
+		 * @return string
+		 */
+	    public function add_lost_password_link() {
+			return '<a href="'. wp_lostpassword_url( home_url() ) .'" class="forget-password-link" title="Esqueceu a senha?">Esqueceu a senha?</a>';
+		}
+
+		/**
+		 * Redirects the user to the custom "Forgot your password?" page instead of
+		 * wp-login.php?action=lostpassword.
+         *
+		 * @link https://code.tutsplus.com/tutorials/build-a-custom-wordpress-user-flow-part-3-password-reset--cms-23811
+		 */
+		public function redirect_to_custom_lostpassword() {
+			if ( 'GET' == $_SERVER['REQUEST_METHOD'] ) {
+				if ( is_user_logged_in() ) {
+					$this->redirect_logged_in_user();
+					exit;
+				}
+
+				wp_redirect( home_url( '/recuperar-senha' ) );
+				exit;
+			}
+		}
+
+		/**
+		 * Initiates password reset.
+         *
+		 * @link https://code.tutsplus.com/tutorials/build-a-custom-wordpress-user-flow-part-3-password-reset--cms-23811
+		 */
+		public function do_password_lost() {
+			if ( 'POST' == $_SERVER['REQUEST_METHOD'] ) {
+				$errors = retrieve_password();
+				if ( is_wp_error( $errors ) ) {
+					// Errors found
+					$redirect_url = home_url( '/recuperar-senha' );
+					$redirect_url = add_query_arg( 'errors', join( ',', $errors->get_error_codes() ), $redirect_url );
+				} else {
+					// Email sent
+					$redirect_url = home_url( '/login' );
+					$redirect_url = add_query_arg( 'checkemail', 'confirm', $redirect_url );
+				}
+
+				wp_redirect( $redirect_url );
+				exit;
+			}
+		}
+
+		/**
+		 * Returns the message body for the password reset mail.
+		 * Called through the retrieve_password_message filter.
+		 *
+         * @link https://code.tutsplus.com/tutorials/build-a-custom-wordpress-user-flow-part-3-password-reset--cms-23811
+		 * @param string  $message    Default mail message.
+		 * @param string  $key        The activation key.
+		 * @param string  $user_login The username for the user.
+		 * @param WP_User $user_data  WP_User object.
+		 *
+		 * @return string   The mail message to send.
+		 */
+		public function replace_retrieve_password_message( $message, $key, $user_login, $user_data ) {
+			$msg  = '<h1>Olá,</h1>';
+			$msg .= '<p>Alguém solicitou a alteração de senha para a seguinte conta: <b>' . $user_login . '</b></p>';
+			$msg .= '<p>Se isso foi um erro, apenas ignore este e-mail e nada acontecerá. Para redefinir sua senha, visite o seguinte endereço:</p>';
+			$msg .= site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user_login ), 'login' );
+			$msg .= '<br><br><p><b>Obrigado!</b></p>';
+
+			return $msg;
 		}
 
 	}
