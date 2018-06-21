@@ -5,7 +5,7 @@
 
     var oscarAdmin = {
         init: function() {
-            console.log('Admin here!');
+            // console.log('Admin scripts here!');
         }
     };
 })(jQuery);

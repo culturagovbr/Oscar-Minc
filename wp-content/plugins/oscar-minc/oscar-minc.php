@@ -60,6 +60,11 @@ if (!class_exists('OscarMinC')) :
 			add_action('login_form_lostpassword', array( $this, 'do_password_lost' ) );
 			add_filter('retrieve_password_message', array( $this, 'replace_retrieve_password_message' ), 10, 4);
 			add_action('check_admin_referer', array( $this, 'logout_without_confirmation' ), 10, 2);
+			add_action('admin_init', array( $this, 'add_committee_role' ));
+			add_action('admin_init', array( $this, 'remove_menus_based_on_roles' ), 999);
+			add_action('admin_menu', array( $this, 'modify_menu_based_on_roles' ), 999);
+			add_action('admin_bar_menu', array( $this, 'remove_toolbar_node_based_on_roles' ), 999);
+			add_action('admin_head', array( $this, 'admin_oscar_roles_style' ), 999);
         }
 
         /**
@@ -86,6 +91,7 @@ if (!class_exists('OscarMinC')) :
                         'singular_name' => 'Inscrição',
                         'add_new' => 'Nova inscrição',
                         'add_new_item' => 'Nova inscrição',
+                        'search_items' => 'Procurar inscrição',
                     ),
                     'description' => 'Inscrições OscarMinC',
                     'public' => true,
@@ -94,6 +100,10 @@ if (!class_exists('OscarMinC')) :
                     'supports' => array('title'),
                     'menu_icon' => 'dashicons-clipboard')
             );
+
+			if(!empty($_GET['movie'])){
+				$this->download_movie_attachment( $_GET['movie'] );
+			}
         }
 
 		/**
@@ -127,13 +137,16 @@ if (!class_exists('OscarMinC')) :
             <div id="oscar-movie-id-<?php echo $post->ID; ?>" class="oscar-thickbox-modal">
                 <div class="oscar-thickbox-modal-body">
 					<?php echo do_shortcode('[video src="'. wp_get_attachment_url( $oscar_movie_id ) .'"]'); ?>
-                    <h4><b>Filme: </b><?php echo get_field('titulo_do_filme', $post->ID); ?></h4>
-                    <p><b>Proponente: <?php echo $post_author->display_name; ?></b></p>
+                    <h3>Filme: <?php echo get_field('titulo_do_filme', $post->ID); ?> <a href="<?php echo admin_url( 'edit.php?post_type=inscricao&movie=' . $oscar_movie_id ); ?>" target="_blank"><span class="dashicons dashicons-download"></span> Baixar filme</a></h3>
+                    <p>Proponente: <b><?php echo $post_author->display_name; ?></b></p>
+                    <div class="movie-desc">
+						<?php echo get_field('breve_sinopse_em_portugues', $post->ID); ?>
+                    </div>
                 </div>
             </div>
 
             <div class="misc-pub-section">
-                Filme: <b><?php echo $oscar_movie_id ? '<a href="#TB_inline?width=600&height=400&inlineId=oscar-movie-id-'. $post->ID .'" class="thickbox oscar-thickbox-link" target="_blank">' . get_field('titulo_do_filme', $post->ID) . '</a>' : get_field('titulo_do_filme', $post->ID) .' (Filme não enviado)'; ?></b>
+                Filme: <b><?php echo $oscar_movie_id ? '<a href="#TB_inline?width=600&height=500&inlineId=oscar-movie-id-'. $post->ID .'" class="thickbox oscar-thickbox-link" target="_blank">' . get_field('titulo_do_filme', $post->ID) . '</a>' : get_field('titulo_do_filme', $post->ID) .' (Filme não enviado)'; ?></b>
             </div>
             <div class="misc-pub-section">
                 <label for="enable-movie-to-comission">
@@ -225,7 +238,11 @@ if (!class_exists('OscarMinC')) :
 
             switch ($column) {
                 case 'responsible':
-                    echo '<a href="'. admin_url('/user-edit.php?user_id=') . $post_author_id . '">' . $post_author->display_name . '</a>';
+                    if( current_user_can('administrator') || current_user_can('editor') ){
+						echo '<a href="'. admin_url('/user-edit.php?user_id=') . $post_author_id . '">' . $post_author->display_name . '</a>';
+                    } else {
+						echo $post_author->display_name;
+                    }
                     break;
                 case 'user_cnpj':
                     echo $this->mask(get_user_meta($post_author_id, '_user_cnpj', true), '##.###.###/####-##');
@@ -236,15 +253,26 @@ if (!class_exists('OscarMinC')) :
                     <div id="oscar-movie-id-<?php echo $post_id; ?>" class="oscar-thickbox-modal">
                         <div class="oscar-thickbox-modal-body">
                             <?php echo do_shortcode('[video src="'. wp_get_attachment_url( $oscar_movie_id ) .'"]'); ?>
+                            <h3>Filme: <?php echo get_field('titulo_do_filme', $post_id); ?> <a href="<?php echo admin_url( 'edit.php?post_type=inscricao&movie=' . $oscar_movie_id ); ?>"><span class="dashicons dashicons-download"></span> Baixar filme</a></h3>
                             <p>Proponente: <b><?php echo $post_author->display_name; ?></b></p>
-                            <p>Filme: <b><?php echo get_field('titulo_do_filme', $post_id); ?></b> <a href="<?php echo wp_get_attachment_url( $oscar_movie_id ); ?>" target="_blank"><small>(baixar filme)</small></a></p>
-                            <p>Sinopse:<br>
-                            <?php echo get_field('breve_sinopse_em_portugues', $post_id); ?></p>
+                            <div class="movie-desc">
+                                <?php echo get_field('breve_sinopse_em_portugues', $post_id); ?>
+                            </div>
                         </div>
                     </div>
 
-                    <?php
-                    echo $oscar_movie_id ? '<a href="#TB_inline?width=600&height=400&inlineId=oscar-movie-id-'. $post_id .'" class="thickbox oscar-thickbox-link">' . get_field('titulo_do_filme', $post_id) . '<br><small style="color: green;">Filme enviado</small></a>' : get_field('titulo_do_filme', $post_id) . '<br><small style="color: red;">Filme não enviado</small>';
+                    <?php if($oscar_movie_id): ?>
+                        <a href="#TB_inline?width=600&height=500&inlineId=oscar-movie-id-<?php echo $post_id ?>" class="thickbox oscar-thickbox-link">
+                            <span class="dashicons dashicons-format-video"></span>
+                            <?php the_field('titulo_do_filme', $post_id) ?><br>
+                            <small style="color: green;" class="movie-status ok">Filme enviado</small>
+                        </a>
+                    <?php else: ?>
+                        <span class="dashicons dashicons-format-video" style="opacity: 0.5;"></span>
+                        <?php the_field('titulo_do_filme', $post_id) ?><br>
+                        <small style="color: red;" class="movie-status">Filme não enviado</small>
+                    <?php endif;
+
                     break;
             }
         }
@@ -636,20 +664,24 @@ if (!class_exists('OscarMinC')) :
         }
 
 		/**
-		 * Redirect user after successful login.
+		 * Redirect user after successful login, based on it's role
 		 *
 		 */
         public function oscar_login_redirect( $redirect_to, $request, $user )
         {
-			if ( isset( $user->roles ) && is_array( $user->roles ) ) {
-				if ( in_array( array('administrator', 'editor'), $user->roles ) ) {
-					return $redirect_to;
+			if ( isset( $user->roles ) && is_array( $user->roles ) ) :
+				if ( in_array( 'administrator', $user->roles ) ) {
+					return admin_url();
+				} elseif ( in_array( 'editor', $user->roles ) ) {
+					return admin_url('edit.php?post_type=inscricao');
+				} elseif ( in_array( 'committee', $user->roles ) ) {
+					return admin_url('edit.php?post_type=inscricao&all_posts=1');
 				} else {
 					return home_url('/minhas-inscricoes');
 				}
-			} else {
+			else:
 				return $redirect_to;
-			}
+			endif;
         }
 
 		/**
@@ -899,6 +931,130 @@ if (!class_exists('OscarMinC')) :
 			}
         }
 
+
+		/**
+		 * Custom role to handle committee
+         *
+		 */
+        public function add_committee_role ()
+        {
+			$capabilities = array(
+				'read' => true,
+				'edit_posts' => true
+			);
+
+			// This is for development only
+			remove_role( 'committee' );
+
+			add_role( 'committee', 'Comissão', $capabilities );
+        }
+
+		/**
+		 * Remove some items from specific roles from main menu
+		 *
+		 */
+        public function remove_menus_based_on_roles ()
+        {
+			$current_user = wp_get_current_user();
+			if( $current_user->roles[0] === 'committee' ){
+				remove_menu_page( 'index.php' );
+				remove_menu_page( 'edit.php' );
+				remove_menu_page( 'tools.php' );
+				remove_menu_page( 'edit.php?post_type=project' );
+				remove_menu_page( 'wpcf7' );
+            }
+		}
+
+		/**
+		 * Modify some items from specific roles from menu
+		 *
+		 */
+		public function modify_menu_based_on_roles ()
+        {
+			global $submenu;
+			$current_user = wp_get_current_user();
+			if( $current_user->roles[0] === 'committee' ){
+				// Remove 'add new' submenu
+				unset($submenu['edit.php?post_type=inscricao'][10]);
+				$submenu['edit.php?post_type=inscricao'][5][2] = $submenu['edit.php?post_type=inscricao'][5][2] . '&all_posts=1';
+            }
+        }
+
+		/**
+		 * Remove some items from specific roles from toolbar
+         *
+		 */
+        public function remove_toolbar_node_based_on_roles ()
+        {
+			global $wp_admin_bar;
+			$current_user = wp_get_current_user();
+			if( $current_user->roles[0] === 'committee' ){
+				$wp_admin_bar->remove_node('wp-logo');
+				$wp_admin_bar->remove_node('comments');
+				$wp_admin_bar->remove_node('new-content');
+			}
+        }
+
+		/**
+         * Add some styles to specific roles
+		 *
+		 */
+        public function admin_oscar_roles_style ()
+        {
+			global $wp_admin_bar;
+			$current_user = wp_get_current_user();
+			if( $current_user->roles[0] === 'committee' ){ ?>
+                <style type="text/css">
+                    #wpbody-content .wrap .wp-heading-inline + a,
+                    #wpbody-content .wrap .subsubsub,
+                    #posts-filter .tablenav,
+                    .movie-status,
+                    tr.user-rich-editing-wrap,
+                    tr.user-admin-color-wrap,
+                    tr.user-comment-shortcuts-wrap,
+                    tr.show-admin-bar,
+                    tr.user-language-wrap,
+                    tr.user-description-wrap,
+                    tr.user-profile-picture,
+                    tr.user-sessions-wrap,
+                    tr.user-nickname-wrap,
+                    tr.user-display-name-wrap,
+                    tr.user-url-wrap,
+                    #wpbody-content .wrap h2{
+                        display: none !important;
+                    }
+                    #posts-filter .search-box{
+                        margin-bottom: 15px;
+                    }
+                </style>
+			<?php }
+        }
+
+		/**
+         * Download attachment file
+         *
+		 * @param $movie_id
+		 */
+        private function download_movie_attachment ( $movie_id )
+        {
+			$file = get_attached_file( $movie_id );
+			if(file_exists($file)) {
+				header('Content-Description: File Transfer');
+				header('Content-Type: application/octet-stream');
+				header('Content-Disposition: attachment; filename='.basename($file));
+				header('Content-Transfer-Encoding: binary');
+				header('Expires: 0');
+				header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+				header('Pragma: public');
+				header('Content-Length: ' . filesize($file));
+				ob_clean();
+				flush();
+				readfile($file);
+				exit;
+			} else {
+			    wp_die('Ocorreu um problema ao tentar realizar o download do filme. <a href="'. admin_url('edit.php?post_type=inscricao') .'">Voltar para a lista de inscrições.</a>');
+            }
+        }
 	}
 
     // Initialize our plugin
