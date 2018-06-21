@@ -51,6 +51,7 @@ class Oscar_Minc_Shortcodes
                 ),
                 'updated_message' => 'Inscrição enviada com sucesso.',
                 'return' => $atts['return'],
+				'uploader' => 'basic',
                 'submit_value' => 'Salvar dados'
             );
             acf_form($settings);

@@ -59,6 +59,7 @@ if (!class_exists('OscarMinC')) :
 			add_action('login_form_lostpassword', array( $this, 'redirect_to_custom_lostpassword' ));
 			add_action('login_form_lostpassword', array( $this, 'do_password_lost' ) );
 			add_filter('retrieve_password_message', array( $this, 'replace_retrieve_password_message' ), 10, 4);
+			add_action('check_admin_referer', array( $this, 'logout_without_confirmation' ), 10, 2);
         }
 
         /**
@@ -882,6 +883,21 @@ if (!class_exists('OscarMinC')) :
 
 			return $msg;
 		}
+
+		/**
+		 * Filter applied to the url returned on logout action
+		 *
+		 * @return string|void
+		 */
+        public function logout_without_confirmation($action, $result)
+        {
+			if ($action == "log-out" && !isset($_GET['_wpnonce'])) {
+				$redirect_to = isset($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : home_url();
+				$location = str_replace('&amp;', '&', wp_logout_url($redirect_to));
+				header("Location: $location");
+				die;
+			}
+        }
 
 	}
 
