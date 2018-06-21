@@ -65,6 +65,7 @@ if (!class_exists('OscarMinC')) :
 			add_action('admin_menu', array( $this, 'modify_menu_based_on_roles' ), 999);
 			add_action('admin_bar_menu', array( $this, 'remove_toolbar_node_based_on_roles' ), 999);
 			add_action('admin_head', array( $this, 'admin_oscar_roles_style' ), 999);
+			add_action('pre_get_posts', array( $this, 'filter_posts_list' ), 1);
         }
 
         /**
@@ -1055,6 +1056,26 @@ if (!class_exists('OscarMinC')) :
 			    wp_die('Ocorreu um problema ao tentar realizar o download do filme. <a href="'. admin_url('edit.php?post_type=inscricao') .'">Voltar para a lista de inscrições.</a>');
             }
         }
+
+		/**
+		 * Show only subscriptions marked as 'enabled' to committee
+		 *
+		 */
+		function filter_posts_list( $query ) {
+			global $current_screen;
+			$user = wp_get_current_user();
+			$user_role = $user->roles[0];
+
+			if ( $user_role !== 'committee' ) {
+				return;
+			}
+
+			if ( is_admin() && $query->is_main_query() && $current_screen->id === 'edit-inscricao' ) {
+			    // Show only movies enabled to committee
+				$query->set( 'meta_key', 'movie_enabled_to_comission' );
+				$query->set( 'meta_value', 1 );
+			}
+		}
 	}
 
     // Initialize our plugin
