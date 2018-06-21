@@ -1,0 +1,20 @@
+@CHARSET "UTF-8";
+
+#footer-brasil.verde {
+   background: none repeat scroll 0% 0% #00420c;
+   padding: 1em 0px;
+   max-width: 100%;
+}
+
+#footer-brasil.amarelo {
+   background: none repeat scroll 0% 0% #2c66ce;
+   padding: 1em 0px;
+   max-width: 100%;
+}
+
+#footer-brasil.azul,
+#footer-brasil.branco {
+   background: none repeat scroll 0% 0% #0042b1;
+   padding: 1em 0px;
+   max-width: 100%;
+}
