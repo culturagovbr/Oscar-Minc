@@ -1091,15 +1091,26 @@ if (!class_exists('OscarMinC')) :
 			$user = wp_get_current_user();
 			$user_role = $user->roles[0];
 
-			if ( $user_role !== 'committee' ) {
-				return $items;
-			}
+			if( $args->theme_location == 'service-menu' ) :
+				$items .= '<li class="menu-item menu-item-object-page menu-item-has-children dropdown committee-link">';
 
-			if( $args->theme_location == 'service-menu' ){
-				$items .= '<li class="menu-item committee-link">';
-				$items .= '<a href="'. admin_url('edit.php?post_type=inscricao&all_posts=1') .'" class="nav-link">Comitê de avaliação</a>';
-                $items .= '</li>';
-			}
+			    if ( is_user_logged_in() ) :
+					$items .= '<a title="Acesso" href="#" data-toggle="dropdown" class="dropdown-toggle" aria-haspopup="true">Acesso <span class="caret"></span></a>';
+					$items .= '<ul role="menu" class=" dropdown-menu">';
+					if( $user_role === 'committee' ) {
+						$items .= '<li itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" class="menu-item"><a title="Filmes inscritos" href="'. admin_url('edit.php?post_type=inscricao&all_posts=1') .'" class="nav-link">Filmes inscritos</a></li>';
+                    } else {
+						$items .= '<li itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" class="menu-item"><a title="Minhas inscrições" href="http://oscar.cultura.localhost/minhas-inscricoes/" class="nav-link">Minhas inscrições</a></li>';
+                    }
+					$items .= '<li itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" class="menu-item"><a title="Perfil" href="http://oscar.cultura.localhost/perfil/" class="nav-link">Perfil</a></li>';
+					$items .= '<li itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" class="menu-item"><a title="Sair" href="'. wp_logout_url( home_url() ) .'" class="nav-link">Sair</a></li>';
+					$items .= '</ul>';
+                else :
+					$items .= '<a itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" title="Entrar" href="'. home_url('login') .'">Entrar</a>';
+                endif;
+
+				$items .= '</li>';
+			endif;
 			return $items;
         }
 	}
