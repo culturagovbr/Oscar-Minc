@@ -66,6 +66,7 @@ if (!class_exists('OscarMinC')) :
 			add_action('admin_bar_menu', array( $this, 'remove_toolbar_node_based_on_roles' ), 999);
 			add_action('admin_head', array( $this, 'admin_oscar_roles_style' ), 999);
 			add_action('pre_get_posts', array( $this, 'filter_posts_list' ), 1);
+			add_filter('wp_nav_menu_items', array($this, 'add_menu_item'), 10, 2);
         }
 
         /**
@@ -1062,7 +1063,7 @@ if (!class_exists('OscarMinC')) :
 		 * Show only subscriptions marked as 'enabled' to committee
 		 *
 		 */
-		function filter_posts_list( $query ) {
+		public function filter_posts_list( $query ) {
 			global $current_screen;
 			$user = wp_get_current_user();
 			$user_role = $user->roles[0];
@@ -1077,6 +1078,30 @@ if (!class_exists('OscarMinC')) :
 				$query->set( 'meta_value', 1 );
 			}
 		}
+
+		/**
+         * Add's a menu item, based on user role
+         *
+		 * @param $items
+		 * @param $args
+		 * @return string
+		 */
+		public function add_menu_item ($items, $args)
+        {
+			$user = wp_get_current_user();
+			$user_role = $user->roles[0];
+
+			if ( $user_role !== 'committee' ) {
+				return $items;
+			}
+
+			if( $args->theme_location == 'service-menu' ){
+				$items .= '<li class="menu-item committee-link">';
+				$items .= '<a href="'. admin_url('edit.php?post_type=inscricao&all_posts=1') .'" class="nav-link">Comitê de avaliação</a>';
+                $items .= '</li>';
+			}
+			return $items;
+        }
 	}
 
     // Initialize our plugin
