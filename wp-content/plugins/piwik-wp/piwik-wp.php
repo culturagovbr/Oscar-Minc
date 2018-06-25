@@ -60,7 +60,6 @@ class PiwikWP {
 				g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
 			})();
 		</script>
-		<noscript><p><img src="http://analise.cultura.gov.br/piwik.php?idsite=<?php echo $options['pwp_script']; ?>&rec=1" style="border:0;" alt="" /></p></noscript>
 		<!-- End Piwik Code -->
 		<?php
              }
