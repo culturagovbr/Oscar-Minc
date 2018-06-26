@@ -1097,9 +1097,9 @@ if (!class_exists('OscarMinC')) :
 					if( $user_role === 'committee' ) {
 						$items .= '<li itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" class="menu-item"><a title="Filmes inscritos" href="'. admin_url('edit.php?post_type=inscricao&all_posts=1') .'" class="nav-link">Filmes inscritos</a></li>';
                     } else {
-						$items .= '<li itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" class="menu-item"><a title="Minhas inscrições" href="http://oscar.cultura.localhost/minhas-inscricoes/" class="nav-link">Minhas inscrições</a></li>';
+						$items .= '<li itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" class="menu-item"><a title="Minhas inscrições" href="'. home_url('/minhas-inscricoes') .'" class="nav-link">Minhas inscrições</a></li>';
                     }
-					$items .= '<li itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" class="menu-item"><a title="Perfil" href="http://oscar.cultura.localhost/perfil/" class="nav-link">Perfil</a></li>';
+					$items .= '<li itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" class="menu-item"><a title="Perfil" href="'. home_url('/perfil') .'" class="nav-link">Perfil</a></li>';
 					$items .= '<li itemscope="itemscope" itemtype="https://www.schema.org/SiteNavigationElement" class="menu-item"><a title="Sair" href="'. wp_logout_url( home_url() ) .'" class="nav-link">Sair</a></li>';
 					$items .= '</ul>';
                 else :
