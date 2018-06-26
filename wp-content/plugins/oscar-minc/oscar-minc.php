@@ -979,6 +979,7 @@ if (!class_exists('OscarMinC')) :
 				remove_menu_page( 'tools.php' );
 				remove_menu_page( 'edit.php?post_type=project' );
 				remove_menu_page( 'wpcf7' );
+				remove_menu_page( 'jetpack' );
             }
 		}
 
