@@ -419,6 +419,7 @@ if (!class_exists('OscarMinC')) :
          */
         public function register_oscar_minc_admin_scripts()
         {
+			wp_enqueue_script('jquery-mask', plugin_dir_url(__FILE__) . 'assets/jquery.mask.min.js', array('jquery'), false, true);
             wp_enqueue_script('oscar-minc-admin-scripts', plugin_dir_url(__FILE__) . 'assets/oscar-minc-admin.js', array('jquery'), false, true);
         }
 
@@ -642,6 +643,22 @@ if (!class_exists('OscarMinC')) :
 		 */
         public function redirect_to_auth()
         {
+			date_default_timezone_set('America/Sao_Paulo');
+			$options = get_option( 'oscar_minc_options' );
+			$now = new DateTime();
+			$deadline = new DateTime($options['oscar_minc_deadline_time']);
+
+			if( $now > $deadline ){
+				if (
+                    is_user_logged_in() && is_page('minhas-inscricoes') ||
+                    is_user_logged_in() && is_page('enviar-video') ||
+                    is_user_logged_in() && is_page('inscricao')
+                ) {
+					wp_redirect( home_url('/inscricoes-encerradas') );
+					exit;
+				}
+            }
+
 			if (
 				!is_user_logged_in() && is_page('minhas-inscricoes') ||
 				!is_user_logged_in() && is_page('enviar-video') ||
@@ -661,7 +678,7 @@ if (!class_exists('OscarMinC')) :
 				wp_redirect( home_url('/perfil') );
 				exit;
 			}
-        }
+		}
 
 		/**
 		 * Redirect user after successful login, based on it's role

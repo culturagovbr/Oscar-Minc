@@ -56,7 +56,7 @@ function oscar_minc_options_page_html() {
  */
 add_action( 'admin_init', 'oscar_minc_settings_init' );
 function oscar_minc_settings_init() {
-    register_setting( 'oscar', 'oscar_minc_options' );
+    register_setting( 'oscar', 'oscar_minc_options', array('sanitize_callback' => 'oscar_sanitize_fields') );
 
     add_settings_section(
         'oscar_minc_video_upload_section',
@@ -242,8 +242,8 @@ function oscar_minc_monitoring_emails( $args ) {
 
 function oscar_minc_deadline_time( $args ) {
     $options = get_option( 'oscar_minc_options' ); ?>
-    <input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="oscar_minc_options[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo $options['oscar_minc_deadline_time']; ?>">
-    <p class="description">Seguindo o seguinte padrão: <b>AAAA-MM-DD 24:59:59</b></p>
+    <input id="<?php echo esc_attr( $args['label_for'] ); ?>" name="oscar_minc_options[<?php echo esc_attr( $args['label_for'] ); ?>]" type="text" value="<?php echo date('d/m/Y H:i', strtotime($options['oscar_minc_deadline_time'])); ?>" placeholder="__/__/____ HH:MM">
+    <p class="description">Seguindo o seguinte padrão: <b>DD/MM/AAAA 24:59</b></p>
     <?php
 }
 
@@ -252,4 +252,13 @@ function oscar_minc_deadline_text( $args ) {
     <textarea id="<?php echo esc_attr( $args['label_for'] ); ?>" name="oscar_minc_options[<?php echo esc_attr( $args['label_for'] ); ?>]" rows="3"><?php echo $options['oscar_minc_deadline_text']; ?></textarea>
     <p class="description">Esta mensagem será visível na tela de inscrições do proponente.</p>
     <?php
+}
+
+function oscar_sanitize_fields ( $input ){
+    $date_arr = explode(' ', $input['oscar_minc_deadline_time']);
+	$raw_date = implode('/', array_reverse(explode('-', $date_arr[0])));
+    $raw_date = implode('-',array_reverse(explode('/',$raw_date)));
+    $raw_time = $date_arr[1] . ':00';
+	$input['oscar_minc_deadline_time'] = $raw_date . ' ' . $raw_time;
+	return $input;
 }
