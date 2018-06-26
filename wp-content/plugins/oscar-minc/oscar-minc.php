@@ -340,13 +340,12 @@ if (!class_exists('OscarMinC')) :
             $headers[] = 'Reply-To: ' . $oscar_minc_options['oscar_minc_email_from_name'] . ' <' . $oscar_minc_options['oscar_minc_email_from'] . '>';
             $subject = 'Nova inscrição ao Oscar.';
 
-            $body = '<h1>Olá,</h1>';
-            $body .= '<p>Uma nova inscrição foi recebida em Oscar.</p><br>';
-            $body .= '<p>Proponente: <b>' . $user->display_name . '</b></p>';
-            $body .= '<p>CNPJ: <b>' . $this->mask($user_cnpj, '##.###.###/####-##') . '</b></p>';
-            $body .= '<p>Filme: <b>' . get_field('titulo_do_filme', $post_id) . '</b></p>';
-            $body .= '<p><br>Para visualiza-la, clique <a href="' . admin_url('post.php?post=' . $post_id . '&action=edit') . '">aqui</a>.<p>';
-            $body .= '<br><br><p><small>Você recebeu este email pois está cadastrado para monitorar as inscrições ao Oscar. Para deixar de monitorar, remova seu email das configurações, em: <a href="' . admin_url('edit.php?post_type=inscricao&page=inscricao-options-page') . '">Configurações Oscar</a></small><p>';
+			$msg  = 'Uma nova inscrição foi recebida em Oscar.<br>';
+			$msg .= 'Proponente: <b>' . $user->display_name . '</b><br>';
+			$msg .= 'CNPJ: <b>' . $this->mask($user_cnpj, '##.###.###/####-##') . '</b><br>';
+			$msg .= 'Filme: <b>' . get_field('titulo_do_filme', $post_id) . '</b>';
+			$msg .= '<br>Para visualiza-la, clique <a href="' . admin_url('post.php?post=' . $post_id . '&action=edit') . '" style="color: rgb(206, 188, 114); text-decoration: none">aqui</a>.';
+			$body = $this->get_email_template('admin', $msg);
 
             if (!wp_mail($to, $subject, $body, $headers)) {
                 error_log("ERRO: O envio de email de monitoramento para: " . $to . ', Falhou!', 0);
@@ -357,8 +356,8 @@ if (!class_exists('OscarMinC')) :
             // Notify the user about its subscription sent
 			$to = $user->user_email;
 			$subject = 'Sua inscrição foi recebida.';
-			$body  = '<h1>Olá '. $user->display_name .',</h1>';
-			$body .= $oscar_minc_options['oscar_minc_email_body'];
+
+			$body = $this->get_email_template('user', $oscar_minc_options['oscar_minc_email_body']);
 
 			if (!wp_mail($to, $subject, $body, $headers)) {
 				error_log("ERRO: O envio de email de monitoramento para: " . $to . ', Falhou!', 0);
@@ -617,8 +616,7 @@ if (!class_exists('OscarMinC')) :
 			$headers[] = 'Reply-To: ' . $oscar_minc_options['oscar_minc_email_from_name'] . ' <' . $oscar_minc_options['oscar_minc_email_from'] . '>';
 			$subject = 'Seu filme ' . get_post_meta($post_id, 'titulo_do_filme', true) . ', foi recebido com sucesso.';
 
-			$body = '<h1>Olá '. $user->display_name .',</h1>';
-			$body .= '<p>'. $oscar_minc_options['oscar_minc_email_body_video_received'] .'</p><br>';
+			$body = $this->get_email_template('user', $oscar_minc_options['oscar_minc_email_body_video_received']);
 
 			if (!wp_mail($to, $subject, $body, $headers)) {
 				error_log("ERRO: O envio de email de monitoramento para: " . $to . ', Falhou!', 0);
@@ -629,10 +627,9 @@ if (!class_exists('OscarMinC')) :
 			$to = array_map('trim', $monitoring_emails);
 			$subject = 'O filme ' . get_post_meta($post_id, 'titulo_do_filme', true) . ', foi enviado com sucesso.';
 
-			$body = '<h1>Olá,</h1>';
-			$body .= '<p>O proponente: <b>' . $user->display_name . '</b>, enviou o filme: <b>' . get_field('titulo_do_filme', $post_id) . '</b></p>';
-			$body .= '<p><br>Para visualiza-la, clique <a href="' . admin_url('post.php?post=' . $post_id . '&action=edit') . '">aqui</a>.<p>';
-			$body .= '<br><br><p><small>Você recebeu este email pois está cadastrado para monitorar as inscrições ao Oscar. Para deixar de monitorar, remova seu email das configurações, em: <a href="' . admin_url('edit.php?post_type=inscricao&page=inscricao-options-page') . '">Configurações Oscar</a></small><p>';
+			$msg = 'O proponente: <b>' . $user->display_name . '</b>, enviou o filme: <b>' . get_field('titulo_do_filme', $post_id) . '</b>';
+			$msg .= '<br>Para visualiza-la, clique <a href="' . admin_url('post.php?post=' . $post_id . '&action=edit') . '" style="color: rgb(206, 188, 114); text-decoration: none">aqui</a>.';
+			$body = $this->get_email_template('admin', $msg);
 
 			if (!wp_mail($to, $subject, $body, $headers)) {
 				error_log("ERRO: O envio de email de monitoramento para: " . $to . ', Falhou!', 0);
@@ -1112,6 +1109,18 @@ if (!class_exists('OscarMinC')) :
 				$items .= '</li>';
 			endif;
 			return $items;
+        }
+
+        public function get_email_template($user_type = 'user', $message)
+        {
+			$user = wp_get_current_user();
+			ob_start();
+			if( $user_type === 'user' ){
+				require dirname( __FILE__ ) . '/email-templates/user-template.php';
+            } else {
+				require dirname( __FILE__ ) . '/email-templates/admin-template.php';
+            }
+			return ob_get_clean();
         }
 	}
 
