@@ -67,6 +67,7 @@ if (!class_exists('OscarMinC')) :
 			add_action('admin_head', array( $this, 'admin_oscar_roles_style' ), 999);
 			add_action('pre_get_posts', array( $this, 'filter_posts_list' ), 1);
 			add_filter('wp_nav_menu_items', array($this, 'add_menu_item'), 10, 2);
+			add_action('wp_mail_failed', array( $this, 'action_wp_mail_failed' ), 10, 1);
         }
 
         /**
@@ -201,7 +202,33 @@ if (!class_exists('OscarMinC')) :
 			}
 
 			if ( isset( $_POST['post_type'] ) && 'inscricao' === $_POST['post_type'] ) {
-				update_post_meta($post_id, 'movie_enabled_to_comission', $_POST['enable-movie-to-comission']);
+
+			    if( update_post_meta($post_id, 'movie_enabled_to_comission', $_POST['enable-movie-to-comission']) ){
+
+			        if( !empty( $_POST['enable-movie-to-comission'] ) ){
+						// Notifies committee about the newly enabled movie
+						$committee_users = get_users( array( 'role' => 'committee' ) );
+						$committee_users_emails = [];
+						foreach ( $committee_users as $user ) {
+							array_push($committee_users_emails, $user->user_email);
+						}
+						$oscar_minc_options = get_option('oscar_minc_options');
+						$to = $committee_users_emails;
+						$headers[] = 'From: ' . bloginfo('name') . ' <automatico@cultura.gov.br>';
+						$headers[] = 'Reply-To: ' . $oscar_minc_options['oscar_minc_email_from_name'] . ' <' . $oscar_minc_options['oscar_minc_email_from'] . '>';
+						$subject = 'Novo filme para avaliação em Brasil no Oscar.';
+
+						$msg  = 'O filme '. get_field('titulo_do_filme', $post_id) .', acaba de ser habilitado para sua avaliação no site Brasil no Oscar.<br>';
+						$msg .= '<br>Para visualiza-lo, clique <a href="' . admin_url('edit.php?post_type=inscricao') . '" style="color: rgb(206, 188, 114); text-decoration: none">aqui</a>.';
+						$body = $this->get_email_template('admin', $msg);
+
+						if (!wp_mail($to, $subject, $body, $headers)) {
+							$emails_failed = implode(', ', $to);
+							error_log("ERRO: O envio de emails para a comissão falhou. Lista de emails: " . $emails_failed, 0);
+						}
+                    }
+
+                }
 
 				if( isset( $_POST['detach-movie-id'] ) ){
 					delete_post_meta( $post_id, 'movie_enabled_to_comission');
@@ -1140,6 +1167,18 @@ if (!class_exists('OscarMinC')) :
             }
 			return ob_get_clean();
         }
+
+		/**
+         * Debugging wp mail like a boss debugger
+         *
+		 * @link https://www.codeforest.net/debugging-wp-mail-like-a-boss-debugger
+		 * @param $wp_error
+		 * @return bool]
+		 */
+		public function action_wp_mail_failed($wp_error)
+		{
+			return error_log(print_r($wp_error, true));
+		}
 	}
 
     // Initialize our plugin
