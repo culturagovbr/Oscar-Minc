@@ -63,7 +63,7 @@
         uploadProcess: function () {
             // Validate movie file
             $(document).on('change', '#oscar-video', function(e) {
-                console.log($('#oscar-video')[0].files[0]);
+                // console.log($('#oscar-video')[0].files[0]);
                 if ($(this)[0].files[0]) {
                     var errors = validateMovie( $('#oscar-video')[0].files[0] );
                     if( errors.length ){
@@ -128,6 +128,7 @@
                     beforeSend: function () {
                         $('#upload-status').removeClass('hidden');
                         $('#oscar-video-upload-btn').text('Enviando vídeo').attr('disabled', 'disabled').hide();
+                        notifyUplodStart( $('#oscar-video')[0].files[0] );
                     },
                     // this part is progress bar
                     xhr: function () {
@@ -180,6 +181,32 @@
                     url: oscar_minc_vars.ajaxurl,
                     data: {
                         action: 'error_on_upload_oscar_video',
+                        movie_name: movieName,
+                        movie_size: movieSize,
+                        movie_type: movieType,
+                        browser_codename: navigator.appCodeName,
+                        browser_name: navigator.appName,
+                        browser_version: navigator.appVersion,
+                        so: navigator.platform
+                    },
+                    type: 'POST',
+                    success: function (res) {
+                        console.log(res);
+                    },
+                    error: function( jqXHR, textStatus, errorThrown ) {
+                        console.error( jqXHR, textStatus, errorThrown );
+                    }
+                });
+            }
+
+            function notifyUplodStart( movieData ) {
+                var movieName = movieData.name,
+                    movieSize = movieData.size,
+                    movieType = movieData.type;
+                $.ajax({
+                    url: oscar_minc_vars.ajaxurl,
+                    data: {
+                        action: 'upload_start_oscar_video',
                         movie_name: movieName,
                         movie_size: movieSize,
                         movie_type: movieType,
