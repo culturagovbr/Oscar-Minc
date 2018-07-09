@@ -70,6 +70,7 @@ if (!class_exists('OscarMinC')) :
 			add_action('wp_mail_failed', array( $this, 'action_wp_mail_failed' ), 10, 1);
             add_action('wp_ajax_upload_start_oscar_video', array($this, 'upload_start_oscar_video'));
             add_action('wp_ajax_nopriv_upload_start_oscar_video', array($this, 'upload_start_oscar_video'));
+            add_action('init', array($this, 'oscar_editor_manage_users'));
         }
 
         /**
@@ -1219,6 +1220,29 @@ if (!class_exists('OscarMinC')) :
                 wp_send_json_success();
                 exit;
             }
+        }
+
+        /**
+         * Let Editors manage users, and run this only once.
+         *
+         * @link https://isabelcastillo.com/editor-role-manage-users-wordpress
+         */
+        function oscar_editor_manage_users() {
+
+            if ( get_option( 'oscar_add_cap_editor_once' ) != 'done' ) {
+
+                // let editor manage users
+                $edit_editor = get_role('editor');
+                $edit_editor->add_cap('edit_users');
+                $edit_editor->add_cap('list_users');
+                $edit_editor->add_cap('promote_users');
+                $edit_editor->add_cap('create_users');
+                $edit_editor->add_cap('add_users');
+                $edit_editor->add_cap('delete_users');
+
+                update_option( 'oscar_add_cap_editor_once', 'done' );
+            }
+
         }
 	}
 
