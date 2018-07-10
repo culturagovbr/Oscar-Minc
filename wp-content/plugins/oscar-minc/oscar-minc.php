@@ -565,7 +565,7 @@ if (!class_exists('OscarMinC')) :
 		 */
 		public function oscar_user_cnpj_field( $user )
 		{
-			if( !current_user_can( 'manage_options' )  ){
+			if( !current_user_can( 'manage_options' ) && !current_user_can( 'editor' )  ){
 				return;
 			}
 			?>
