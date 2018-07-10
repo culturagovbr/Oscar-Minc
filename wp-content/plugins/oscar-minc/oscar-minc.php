@@ -573,13 +573,99 @@ if (!class_exists('OscarMinC')) :
 
 			<table class="form-table">
 				<tr>
-					<th>CNPJ do usuário</th>
+					<th>Empresa produtora</th>
 					<td>
-						<label for="user_cnpj">
-							<input name="user_cnpj" type="text" id="user_cnpj" value="<?php echo $this->mask(get_user_meta( $user->ID, '_user_cnpj', true ), '##.###.###/####-##'); ?>">
+						<label for="user_company">
+							<input name="user_company" type="text" id="user_company" value="<?php echo get_user_meta( $user->ID, '_user_company', true ); ?>">
 						</label>
 					</td>
 				</tr>
+                <tr>
+                    <th>CNPJ</th>
+                    <td>
+                        <label for="user_cnpj">
+                            <input name="user_cnpj" type="text" id="user_cnpj" value="<?php echo $this->mask(get_user_meta( $user->ID, '_user_cnpj', true ), '##.###.###/####-##'); ?>">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Telefone</th>
+                    <td>
+                        <label for="user_phone">
+                            <input name="user_phone" type="text" id="user_phone" value="<?php echo get_user_meta( $user->ID, '_user_phone', true ); ?>">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Distribuidora nos EUA (se houver)</th>
+                    <td>
+                        <label for="user_distributor">
+                            <input name="user_distributor" type="text" id="user_distributor" value="<?php echo get_user_meta( $user->ID, '_user_distributor', true ); ?>">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Endereço</th>
+                    <td>
+                        <label for="user_address">
+                            <input name="user_address" type="text" id="user_address" value="<?php echo get_user_meta( $user->ID, '_user_address', true ); ?>">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Estado</th>
+                    <td>
+                        <label for="user_state">
+                        <?php $state = get_user_meta( $user->ID, '_user_state', true ); ?>
+                        <select id="user_state" class="form-control" name="user_state">
+                            <option value="">Selecione</option>
+                            <option <?php echo ( $state === 'Acre (AC)' ) ? 'selected="selected"' : ''; ?> value="Acre (AC)">Acre (AC)</option>
+                            <option <?php echo ( $state === 'Alagoas (AL)' ) ? 'selected="selected"' : ''; ?> value="Alagoas (AL)">Alagoas (AL)</option>
+                            <option <?php echo ( $state === 'Amapá (AP)' ) ? 'selected="selected"' : ''; ?> value="Amapá (AP)">Amapá (AP)</option>
+                            <option <?php echo ( $state === 'Amazonas (AM)' ) ? 'selected="selected"' : ''; ?> value="Amazonas (AM)">Amazonas (AM)</option>
+                            <option <?php echo ( $state === 'Bahia (BA)' ) ? 'selected="selected"' : ''; ?> value="Bahia (BA)">Bahia (BA)</option>
+                            <option <?php echo ( $state === 'Ceará (CE)' ) ? 'selected="selected"' : ''; ?> value="Ceará (CE)">Ceará (CE)</option>
+                            <option <?php echo ( $state === 'Distrito Federal (DF)' ) ? 'selected="selected"' : ''; ?> value="Distrito Federal (DF)">Distrito Federal (DF)</option>
+                            <option <?php echo ( $state === 'Espírito Santo (ES)' ) ? 'selected="selected"' : ''; ?> value="Espírito Santo (ES)">Espírito Santo (ES)</option>
+                            <option <?php echo ( $state === 'Goiás (GO)' ) ? 'selected="selected"' : ''; ?> value="Goiás (GO)">Goiás (GO)</option>
+                            <option <?php echo ( $state === 'Maranhão (MA)' ) ? 'selected="selected"' : ''; ?> value="Maranhão (MA)">Maranhão (MA)</option>
+                            <option <?php echo ( $state === 'Mato Grosso (MT)' ) ? 'selected="selected"' : ''; ?> value="Mato Grosso (MT)">Mato Grosso (MT)</option>
+                            <option <?php echo ( $state === 'Mato Grosso do Sul (MS)' ) ? 'selected="selected"' : ''; ?> value="Mato Grosso do Sul (MS)">Mato Grosso do Sul (MS)</option>
+                            <option <?php echo ( $state === 'Minas Gerais (MG)' ) ? 'selected="selected"' : ''; ?> value="Minas Gerais (MG)">Minas Gerais (MG)</option>
+                            <option <?php echo ( $state === 'Pará (PA)' ) ? 'selected="selected"' : ''; ?> value="Pará (PA)">Pará (PA)</option>
+                            <option <?php echo ( $state === 'Paraíba (PB)' ) ? 'selected="selected"' : ''; ?> value="Paraíba (PB)">Paraíba (PB)</option>
+                            <option <?php echo ( $state === 'Paraná (PR)' ) ? 'selected="selected"' : ''; ?> value="Paraná (PR)">Paraná (PR)</option>
+                            <option <?php echo ( $state === 'Pernambuco (PE)' ) ? 'selected="selected"' : ''; ?> value="Pernambuco (PE)">Pernambuco (PE)</option>
+                            <option <?php echo ( $state === 'Piauí (PI)' ) ? 'selected="selected"' : ''; ?> value="Piauí (PI)">Piauí (PI)</option>
+                            <option <?php echo ( $state === 'Rio de Janeiro (RJ)' ) ? 'selected="selected"' : ''; ?> value="Rio de Janeiro (RJ)">Rio de Janeiro (RJ)</option>
+                            <option <?php echo ( $state === 'Rio Grande do Norte (RN)' ) ? 'selected="selected"' : ''; ?> value="Rio Grande do Norte (RN)">Rio Grande do Norte (RN)</option>
+                            <option <?php echo ( $state === 'Rio Grande do Sul (RS)' ) ? 'selected="selected"' : ''; ?> value="Rio Grande do Sul (RS)">Rio Grande do Sul (RS)</option>
+                            <option <?php echo ( $state === 'Rondônia (RO)' ) ? 'selected="selected"' : ''; ?> value="Rondônia (RO)">Rondônia (RO)</option>
+                            <option <?php echo ( $state === 'Roraima (RR)' ) ? 'selected="selected"' : ''; ?> value="Roraima (RR)">Roraima (RR)</option>
+                            <option <?php echo ( $state === 'Santa Catarina (SC)' ) ? 'selected="selected"' : ''; ?> value="Santa Catarina (SC)">Santa Catarina (SC)</option>
+                            <option <?php echo ( $state === 'São Paulo (SP)' ) ? 'selected="selected"' : ''; ?> value="São Paulo (SP)">São Paulo (SP)</option>
+                            <option <?php echo ( $state === 'Sergipe (SE)' ) ? 'selected="selected"' : ''; ?> value="Sergipe (SE)">Sergipe (SE)</option>
+                            <option <?php echo ( $state === 'Tocantins (TO)' ) ? 'selected="selected"' : ''; ?> value="Tocantins (TO)">Tocantins (TO)</option>
+                        </select>
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th>Cidade</th>
+                    <td>
+                        <label for="user_city">
+                            <input name="user_city" type="text" id="user_city" value="<?php echo get_user_meta( $user->ID, '_user_city', true ); ?>">
+                        </label>
+                    </td>
+                </tr>
+                <tr>
+                    <th>CEP</th>
+                    <td>
+                        <label for="user_zipcode">
+                            <input name="user_zipcode" type="text" id="user_zipcode" value="<?php echo get_user_meta( $user->ID, '_user_zipcode', true ); ?>">
+                        </label>
+                    </td>
+                </tr>
 			</table>
 		<?php }
 
