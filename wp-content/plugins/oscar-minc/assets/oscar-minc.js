@@ -8,8 +8,20 @@
 
     var oscar = {
         init: function() {
+
+            var SPMaskBehavior = function (val) {
+                    return val.replace(/\D/g, '').length === 11 ? '(00) 00000-0000' : '(00) 0000-00009';
+                },
+                spOptions = {
+                    onKeyPress: function(val, e, field, options) {
+                        field.mask(SPMaskBehavior.apply({}, arguments), options);
+                    }
+                };
+
             $('[data-toggle="tooltip"]').tooltip();
             $('#reg-cnpj').mask('00.000.000/0000-00');
+            $('#zipcode').mask('00000-000');
+            $('#phone').mask(SPMaskBehavior, spOptions);
         },
 
         mainFormUtils: function () {

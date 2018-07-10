@@ -82,7 +82,14 @@ class Oscar_Minc_Shortcodes
 			$current_user = wp_get_current_user();
 			$name = $current_user->display_name;
 			$email = $current_user->user_email;
-			$cnpj = OscarMinC::mask(get_user_meta( $current_user->ID, '_user_cnpj', true ), '##.###.###/####-##'); ;
+            $company = get_user_meta( $current_user->ID, '_user_company', true );
+			$cnpj = OscarMinC::mask(get_user_meta( $current_user->ID, '_user_cnpj', true ), '##.###.###/####-##');
+            $phone = get_user_meta( $current_user->ID, '_user_phone', true );
+            $distributor = get_user_meta( $current_user->ID, '_user_distributor', true );
+			$address = get_user_meta( $current_user->ID, '_user_address', true );
+			$state = get_user_meta( $current_user->ID, '_user_state', true );
+			$city = get_user_meta( $current_user->ID, '_user_city', true );
+			$zipcode = get_user_meta( $current_user->ID, '_user_zipcode', true );
         }
 
 		ob_start();
@@ -94,35 +101,111 @@ class Oscar_Minc_Shortcodes
         <form id="oscar-register-form" method="post" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
             <div class="login-form row">
                 <div class="form-group col-md-6">
-                    <label class="login-field-icon fui-user" for="reg-name">Nome completo</label>
+                    <label class="login-field-icon fui-user" for="reg-name">Nome completo <span style="color: red;">*</span></label>
                     <input name="reg_name" type="text" class="form-control login-field"
                            value="<?php echo(isset($_POST['reg_name']) ? $_POST['reg_name'] : $name); ?>"
-                           placeholder="" id="reg-name" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
+                           id="reg-name" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
                 </div>
 
                 <div class="form-group col-md-6">
-                    <label class="login-field-icon fui-mail" for="reg-email">Email</label>
+                    <label class="login-field-icon fui-mail" for="reg-email">Email <span style="color: red;">*</span></label>
                     <input name="reg_email" type="email" class="form-control login-field"
                            value="<?php echo(isset($_POST['reg_email']) ? $_POST['reg_email'] : $email); ?>"
-                           placeholder="" id="reg-email" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
+                           id="reg-email" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
                 </div>
 
                 <div class="form-group col-md-4">
-                    <label class="login-field-icon fui-lock" for="reg-cnpj">CNPJ</label>
+                    <label class="login-field-icon fui-user" for="company">Empresa produtora <span style="color: red;">*</span></label>
+                    <input name="company" type="text" class="form-control login-field"
+                           value="<?php echo(isset($_POST['company']) ? $_POST['company'] : $company); ?>"
+                           id="company"/>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label class="login-field-icon fui-lock" for="reg-cnpj">CNPJ <span style="color: red;">*</span></label>
                     <input name="cnpj" type="text" class="form-control login-field"
                            value="<?php echo(isset($_POST['cnpj']) ? $_POST['cnpj'] : $cnpj); ?>"
                            placeholder="00.000.000/0000-00" id="reg-cnpj" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
                 </div>
 
                 <div class="form-group col-md-4">
-                    <label class="login-field-icon fui-lock" for="reg-pass">Senha</label>
+                    <label class="login-field-icon fui-user" for="phone">Telefone <span style="color: red;">*</span></label>
+                    <input name="phone" type="text" class="form-control login-field"
+                           value="<?php echo(isset($_POST['phone']) ? $_POST['phone'] : $phone); ?>"
+                           placeholder="(00) 0000-0000" id="phone" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
+                </div>
+
+                <div class="form-group col-md-12">
+                    <label class="login-field-icon fui-user" for="distributor">Distribuidora nos EUA (se houver)</label>
+                    <input name="distributor" type="text" class="form-control login-field"
+                           value="<?php echo(isset($_POST['distributor']) ? $_POST['distributor'] : $distributor); ?>"
+                           id="distributor"/>
+                </div>
+
+                <div class="form-group col-md-12">
+                    <label class="login-field-icon fui-lock" for="address">Endereço <span style="color: red;">*</span></label>
+                    <input name="address" type="text" class="form-control login-field"
+                           value="<?php echo(isset($_POST['address']) ? $_POST['address'] : $address); ?>"
+                           id="address" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label class="login-field-icon fui-lock" for="state">Estado <span style="color: red;">*</span></label>
+                    <select id="state" class="form-control" name="state" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>>
+                        <option value="">Selecione</option>
+                        <option <?php echo ( $state === 'Acre (AC)' ) ? 'selected="selected"' : ''; ?> value="Acre (AC)">Acre (AC)</option>
+                        <option <?php echo ( $state === 'Alagoas (AL)' ) ? 'selected="selected"' : ''; ?> value="Alagoas (AL)">Alagoas (AL)</option>
+                        <option <?php echo ( $state === 'Amapá (AP)' ) ? 'selected="selected"' : ''; ?> value="Amapá (AP)">Amapá (AP)</option>
+                        <option <?php echo ( $state === 'Amazonas (AM)' ) ? 'selected="selected"' : ''; ?> value="Amazonas (AM)">Amazonas (AM)</option>
+                        <option <?php echo ( $state === 'Bahia (BA)' ) ? 'selected="selected"' : ''; ?> value="Bahia (BA)">Bahia (BA)</option>
+                        <option <?php echo ( $state === 'Ceará (CE)' ) ? 'selected="selected"' : ''; ?> value="Ceará (CE)">Ceará (CE)</option>
+                        <option <?php echo ( $state === 'Distrito Federal (DF)' ) ? 'selected="selected"' : ''; ?> value="Distrito Federal (DF)">Distrito Federal (DF)</option>
+                        <option <?php echo ( $state === 'Espírito Santo (ES)' ) ? 'selected="selected"' : ''; ?> value="Espírito Santo (ES)">Espírito Santo (ES)</option>
+                        <option <?php echo ( $state === 'Goiás (GO)' ) ? 'selected="selected"' : ''; ?> value="Goiás (GO)">Goiás (GO)</option>
+                        <option <?php echo ( $state === 'Maranhão (MA)' ) ? 'selected="selected"' : ''; ?> value="Maranhão (MA)">Maranhão (MA)</option>
+                        <option <?php echo ( $state === 'Mato Grosso (MT)' ) ? 'selected="selected"' : ''; ?> value="Mato Grosso (MT)">Mato Grosso (MT)</option>
+                        <option <?php echo ( $state === 'Mato Grosso do Sul (MS)' ) ? 'selected="selected"' : ''; ?> value="Mato Grosso do Sul (MS)">Mato Grosso do Sul (MS)</option>
+                        <option <?php echo ( $state === 'Minas Gerais (MG)' ) ? 'selected="selected"' : ''; ?> value="Minas Gerais (MG)">Minas Gerais (MG)</option>
+                        <option <?php echo ( $state === 'Pará (PA)' ) ? 'selected="selected"' : ''; ?> value="Pará (PA)">Pará (PA)</option>
+                        <option <?php echo ( $state === 'Paraíba (PB)' ) ? 'selected="selected"' : ''; ?> value="Paraíba (PB)">Paraíba (PB)</option>
+                        <option <?php echo ( $state === 'Paraná (PR)' ) ? 'selected="selected"' : ''; ?> value="Paraná (PR)">Paraná (PR)</option>
+                        <option <?php echo ( $state === 'Pernambuco (PE)' ) ? 'selected="selected"' : ''; ?> value="Pernambuco (PE)">Pernambuco (PE)</option>
+                        <option <?php echo ( $state === 'Piauí (PI)' ) ? 'selected="selected"' : ''; ?> value="Piauí (PI)">Piauí (PI)</option>
+                        <option <?php echo ( $state === 'Rio de Janeiro (RJ)' ) ? 'selected="selected"' : ''; ?> value="Rio de Janeiro (RJ)">Rio de Janeiro (RJ)</option>
+                        <option <?php echo ( $state === 'Rio Grande do Norte (RN)' ) ? 'selected="selected"' : ''; ?> value="Rio Grande do Norte (RN)">Rio Grande do Norte (RN)</option>
+                        <option <?php echo ( $state === 'Rio Grande do Sul (RS)' ) ? 'selected="selected"' : ''; ?> value="Rio Grande do Sul (RS)">Rio Grande do Sul (RS)</option>
+                        <option <?php echo ( $state === 'Rondônia (RO)' ) ? 'selected="selected"' : ''; ?> value="Rondônia (RO)">Rondônia (RO)</option>
+                        <option <?php echo ( $state === 'Roraima (RR)' ) ? 'selected="selected"' : ''; ?> value="Roraima (RR)">Roraima (RR)</option>
+                        <option <?php echo ( $state === 'Santa Catarina (SC)' ) ? 'selected="selected"' : ''; ?> value="Santa Catarina (SC)">Santa Catarina (SC)</option>
+                        <option <?php echo ( $state === 'São Paulo (SP)' ) ? 'selected="selected"' : ''; ?> value="São Paulo (SP)">São Paulo (SP)</option>
+                        <option <?php echo ( $state === 'Sergipe (SE)' ) ? 'selected="selected"' : ''; ?> value="Sergipe (SE)">Sergipe (SE)</option>
+                        <option <?php echo ( $state === 'Tocantins (TO)' ) ? 'selected="selected"' : ''; ?> value="Tocantins (TO)">Tocantins (TO)</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label class="login-field-icon fui-lock" for="city">Cidade <span style="color: red;">*</span></label>
+                    <input name="city" type="text" class="form-control login-field"
+                           value="<?php echo(isset($_POST['city']) ? $_POST['city'] : $city); ?>"
+                           id="city" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
+                </div>
+
+                <div class="form-group col-md-4">
+                    <label class="login-field-icon fui-lock" for="zipcode">CEP <span style="color: red;">*</span></label>
+                    <input name="zipcode" type="text" class="form-control login-field"
+                           value="<?php echo(isset($_POST['zipcode']) ? $_POST['zipcode'] : $zipcode); ?>"
+                           placeholder="00000-000" id="zipcode" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label class="login-field-icon fui-lock" for="reg-pass">Senha <?php echo is_user_logged_in() ? '' : '<span style="color: red;">*</span>'; ?></label>
                     <input name="reg_password" type="password" class="form-control login-field"
                            value="<?php echo(isset($_POST['reg_password']) ? $_POST['reg_password'] : null); ?>"
                            placeholder="" id="reg-pass" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
                 </div>
 
-                <div class="form-group col-md-4">
-                    <label class="login-field-icon fui-lock" for="reg-pass-repeat">Repita a senha</label>
+                <div class="form-group col-md-6">
+                    <label class="login-field-icon fui-lock" for="reg-pass-repeat">Repita a senha <?php echo is_user_logged_in() ? '' : '<span style="color: red;">*</span>'; ?></label>
                     <input name="reg_password_repeat" type="password" class="form-control login-field"
                            value="<?php echo(isset($_POST['reg_password_repeat']) ? $_POST['reg_password_repeat'] : null); ?>"
                            placeholder="" id="reg-pass-repeat" <?php echo is_user_logged_in() ? '' : 'required'; ?>/>
@@ -138,6 +221,7 @@ class Oscar_Minc_Shortcodes
         <?php endif; ?>
         </form>
 
+        <p class="text-right"><small>Campos marcados com <span style="color: red;">*</span> são obrigatórios.</small></p>
 		<?php return ob_get_clean();
     }
 
@@ -150,18 +234,45 @@ class Oscar_Minc_Shortcodes
     {
         $username = $_POST['reg_name'];
         $email = $_POST['reg_email'];
+        $company = $_POST['company'];
         $cnpj = $_POST['cnpj'];
+        $phone = $_POST['phone'];
+        $address = $_POST['address'];
+        $state = $_POST['state'];
+        $city = $_POST['city'];
+        $zipcode = $_POST['zipcode'];
         $password = $_POST['reg_password'];
         $reg_password_repeat = $_POST['reg_password_repeat'];
 		$is_updating = isset( $_POST['is-updating'] ) ? true : false;
 
 		if( !$is_updating ){
-			if (empty($username) || empty($password) || empty($email) || empty($cnpj)) {
-				return new WP_Error('field', 'Todos os campos são de preenchimento obrigatório.');
+			if (
+                empty($username) ||
+                empty($password) ||
+                empty($email) ||
+                empty($company) ||
+                empty($cnpj) ||
+                empty($phone) ||
+                empty($address) ||
+                empty($state) ||
+                empty($city) ||
+                empty($zipcode)
+            ) {
+				return new WP_Error('field', 'Existem campos obrigatórios não preenchidos.');
 			}
         } else {
-			if (empty($username) || empty($email) || empty($cnpj)) {
-				return new WP_Error('field', 'Todos os campos são de preenchimento obrigatório.');
+            if (
+                empty($username) ||
+                empty($email) ||
+                empty($company) ||
+                empty($cnpj) ||
+                empty($phone) ||
+                empty($address) ||
+                empty($state) ||
+                empty($city) ||
+                empty($zipcode)
+            ) {
+				return new WP_Error('field', 'Existem campos obrigatórios não preenchidos.');
 			}
         }
 
@@ -200,7 +311,14 @@ class Oscar_Minc_Shortcodes
     {
         $username = $_POST['reg_name'];
         $email = $_POST['reg_email'];
+        $company = $_POST['company'];
         $cnpj = str_replace('.', '', str_replace('-', '', str_replace('/', '', $_POST['cnpj'])));
+        $phone = $_POST['phone'];
+        $distributor = $_POST['distributor'];
+        $address = $_POST['address'];
+        $state = $_POST['state'];
+        $city = $_POST['city'];
+        $zipcode = $_POST['zipcode'];
         $password = $_POST['reg_password'];
         $user_id = $_POST['user-id'];
         $is_updating = isset( $_POST['is-updating'] ) ? true : false;
@@ -237,6 +355,16 @@ class Oscar_Minc_Shortcodes
 					echo '<strong>' . $user_id->get_error_message() . '</strong>';
 					echo '</div>';
 				} else {
+
+                    update_user_meta( $user_id, '_user_company', esc_attr($company) );
+                    update_user_meta( $user_id, '_user_cnpj', esc_attr($cnpj) );
+                    update_user_meta( $user_id, '_user_phone', esc_attr($phone) );
+                    update_user_meta( $user_id, '_user_distributor', esc_attr($distributor) );
+                    update_user_meta( $user_id, '_user_address', esc_attr($address) );
+                    update_user_meta( $user_id, '_user_state', esc_attr($state) );
+                    update_user_meta( $user_id, '_user_city', esc_attr($city) );
+                    update_user_meta( $user_id, '_user_zipcode', esc_attr($zipcode) );
+
 					echo '<div class="alert alert-success">';
 					echo 'Cadastro atualizado com sucesso.';
 					echo '</div>';
@@ -244,7 +372,16 @@ class Oscar_Minc_Shortcodes
             } else {
 				$register_user = wp_insert_user($userdata);
 				if (!is_wp_error($register_user)) {
+
+					add_user_meta($register_user, '_user_company', esc_attr($company), true);
 					add_user_meta($register_user, '_user_cnpj', esc_attr($cnpj), true);
+					add_user_meta($register_user, '_user_phone', esc_attr($phone), true);
+                    add_user_meta($register_user, '_user_distributor', esc_attr($distributor), true);
+					add_user_meta($register_user, '_user_address', esc_attr($address), true);
+					add_user_meta($register_user, '_user_state', esc_attr($state), true);
+					add_user_meta($register_user, '_user_city', esc_attr($city), true);
+					add_user_meta($register_user, '_user_zipcode', esc_attr($zipcode), true);
+
 					echo '<div class="alert alert-success">';
 					echo 'Cadastro realizado com sucesso. Você será redirionado para a tela de login em <b class="time-before-redirect">5</b> segundos, caso isso não ocorra automaticamente, clique <strong><a href="' . home_url('/login') . '">aqui</a></strong>!';
 					echo '</div>';
