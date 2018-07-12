@@ -1154,6 +1154,8 @@ if (!class_exists('OscarMinC')) :
                     tr.user-nickname-wrap,
                     tr.user-display-name-wrap,
                     tr.user-url-wrap,
+                    #post-by-email,
+                    #your-profile .form-table + .form-table,
                     #wpbody-content .wrap h2{
                         display: none !important;
                     }

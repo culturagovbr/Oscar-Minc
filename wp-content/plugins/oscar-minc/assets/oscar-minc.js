@@ -174,7 +174,7 @@
                         }
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
-                        // console.error( jqXHR, textStatus, errorThrown );
+                        console.error( 'Error on sending video', jqXHR, textStatus, errorThrown );
                         notifyErrorOnUplod( $('#oscar-video')[0].files[0] );
                         $('#error-alert').removeClass('d-none').html('<p>Ocorreu um <b>erro</b> em nosso sistema ao enviar seu filme. Nossa equipe técnica foi avisada e entrará em contato após a resolução do problema.</p>');
                         $('#oscar-video-form .myprogress').removeClass('progress-bar-animated');
@@ -203,7 +203,8 @@
                     },
                     type: 'POST',
                     success: function (res) {
-                        console.log(res);
+	                    // console.log(res);
+	                    console.log('Notify error on upload successfully!');
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
                         console.error( jqXHR, textStatus, errorThrown );
@@ -229,10 +230,10 @@
                     },
                     type: 'POST',
                     success: function (res) {
-                        console.log(res);
+                        // console.log(res);
                     },
                     error: function( jqXHR, textStatus, errorThrown ) {
-                        console.error( jqXHR, textStatus, errorThrown );
+                        // console.error( jqXHR, textStatus, errorThrown );
                     }
                 });
             }
