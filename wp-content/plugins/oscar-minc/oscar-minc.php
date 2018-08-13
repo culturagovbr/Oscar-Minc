@@ -286,7 +286,7 @@ if (!class_exists('OscarMinC')) :
                     <div id="oscar-movie-id-<?php echo $post_id; ?>" class="oscar-thickbox-modal">
                         <div class="oscar-thickbox-modal-body">
                             <?php echo do_shortcode('[video src="'. wp_get_attachment_url( $oscar_movie_id ) .'"]'); ?>
-                            <h3>Filme: <?php echo get_field('titulo_do_filme', $post_id); ?> <a href="<?php echo wp_get_attachment_url( $oscar_movie_id ); ?>" target="_blank"><span class="dashicons dashicons-download"></span> Baixar filme</a></h3>
+                            <h3>Filme: <?php echo get_field('titulo_do_filme', $post_id); ?> <a href="<?php echo admin_url( 'edit.php?post_type=inscricao&movie=' . $oscar_movie_id ); ?>"><span class="dashicons dashicons-download"></span> Baixar filme</a></h3>
                             <p>Proponente: <b><?php echo $post_author->display_name; ?></b></p>
                             <div class="movie-desc">
                                 <?php echo get_field('breve_sinopse_em_portugues', $post_id); ?>
