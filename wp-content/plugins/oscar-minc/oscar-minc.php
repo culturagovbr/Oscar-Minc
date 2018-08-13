@@ -1185,6 +1185,7 @@ if (!class_exists('OscarMinC')) :
 				header('Content-Length: ' . filesize($file));
 				ob_clean();
 				flush();
+				ob_end_flush();
 				readfile($file);
 				exit;
 			} else {
