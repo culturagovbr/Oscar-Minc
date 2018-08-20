@@ -186,6 +186,17 @@ if (!class_exists('OscarMinC')) :
                     }
                 }
             </script>
+			<?php
+			$current_user = wp_get_current_user();
+			if( $current_user->roles[0] === 'administrator' ): ?>
+				<div class="misc-pub-section">
+					<label for="attach-movie-manually">
+						Vincular vídeo manualmente
+					</label>
+					<input id="attach-movie-manually" name="attach-movie-manually" type="number" value="<?php echo $oscar_movie_id ? $oscar_movie_id : ''; ?>">
+					<p class="description">Insira a Identificação (attachment ID) do vídeo. <b>Atenção</b>, isso irá sobrescrever o vídeo já enviado pelo proponente!</p>
+				</div>
+			<?php endif; ?>
 		<?php }
 
 		/**
@@ -237,6 +248,10 @@ if (!class_exists('OscarMinC')) :
 					delete_post_meta( $post_id, 'movie_enabled_to_comission');
 					delete_post_meta( $post_id, 'movie_attachment_id');
                 }
+
+				if( isset( $_POST['attach-movie-manually'] ) ){
+					update_post_meta($post_id, 'movie_attachment_id', $_POST['attach-movie-manually']);
+				}
 
 			}
         }
