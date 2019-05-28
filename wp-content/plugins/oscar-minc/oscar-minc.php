@@ -778,8 +778,9 @@ if (!class_exists('OscarMinC')) :
 			$options = get_option( 'oscar_minc_options' );
 			$now = new DateTime();
 			$deadline = new DateTime($options['oscar_minc_deadline_time']);
-
-			if( $now > $deadline ){
+			$cur_user_is_admin_or_editor = ( current_user_can( 'editor' ) || current_user_can( 'administrator' ) ) ? true : false;
+			
+			if( $now > $deadline && !$cur_user_is_admin_or_editor ){
 				if (
                     is_user_logged_in() && is_page('minhas-inscricoes') ||
                     is_user_logged_in() && is_page('enviar-video') ||
